@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>akash-vani</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<header class="top">
+  <h1>akash-vani</h1>
+  <div id="status" class="status" data-state="idle"><span class="dot"></span><span id="statusText">Not connected</span></div>
+</header>
+
+<main>
+  <section id="join" class="card">
+    <h2>Join a room</h2>
+    <p class="muted">Both people enter the same room code, then pick a video.</p>
+    <form id="joinForm">
+      <label>Room code
+        <input id="roomInput" required maxlength="40" autocomplete="off" placeholder="e.g. movie-night">
+      </label>
+      <button type="submit" class="primary">Join</button>
+    </form>
+  </section>
+
+  <section id="room" class="room" hidden>
+    <div class="stage">
+      <div id="warn" class="warn" hidden></div>
+      <div class="playerWrap">
+        <video id="video" controls playsinline></video>
+        <div id="empty" class="empty">Pick a video source below</div>
+      </div>
+      <form id="srcForm" class="src">
+        <div class="seg">
+          <label><input type="radio" name="srcType" value="url" checked> URL</label>
+          <label><input type="radio" name="srcType" value="file"> Local file</label>
+        </div>
+        <input id="urlInput" type="url" placeholder="https://example.com/video.mp4">
+        <input id="fileInput" type="file" accept="video/mp4,video/webm,video/*" hidden>
+        <button type="submit" class="primary">Load</button>
+      </form>
+      <p class="muted small">Each person loads their own copy. Use the same video for best results.</p>
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <h3>Invite</h3>
+        <div class="row">
+          <input id="inviteInput" readonly>
+          <button id="copyBtn" type="button">Copy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Voice</h3>
+        <div class="row">
+          <button id="callBtn" type="button">Start call</button>
+          <button id="muteBtn" type="button" hidden>Mute</button>
+          <button id="hangBtn" type="button" class="danger" hidden>Hang up</button>
+        </div>
+        <div id="incoming" class="row" hidden>
+          <span>Incoming call</span>
+          <button id="answerBtn" type="button" class="primary">Answer</button>
+        </div>
+        <audio id="remoteAudio" autoplay></audio>
+      </div>
+
+      <div class="card chat">
+        <h3>Chat</h3>
+        <div id="log" class="log" aria-live="polite"></div>
+        <form id="chatForm" class="row">
+          <input id="chatInput" autocomplete="off" placeholder="Message" disabled>
+          <button type="submit" id="sendBtn" disabled>Send</button>
+        </form>
+      </div>
+    </aside>
+  </section>
+</main>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
