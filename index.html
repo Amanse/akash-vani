@@ -30,7 +30,13 @@
       <div id="warn" class="warn" hidden></div>
       <div class="playerWrap">
         <video id="video" controls playsinline></video>
+        <video id="remoteVideo" playsinline hidden></video>
         <div id="empty" class="empty">Pick a video source below</div>
+      </div>
+      <div id="streamBar" class="streamBar" hidden>
+        <button id="sbPlay" type="button">Play</button>
+        <input id="sbSeek" type="range" min="0" max="1" step="0.1" value="0">
+        <span id="sbTime" class="muted small">0:00</span>
       </div>
       <form id="srcForm" class="src">
         <div class="seg">
@@ -38,9 +44,11 @@
           <label><input type="radio" name="srcType" value="file"> Local file</label>
         </div>
         <input id="urlInput" type="url" placeholder="https://example.com/video.mp4">
-        <input id="fileInput" type="file" accept="video/mp4,video/webm,video/*" hidden>
+        <input id="fileInput" type="file" accept="video/*,.mp4,.m4v,.mov,.webm,.mkv,.ogv" hidden>
         <button type="submit" class="primary">Load</button>
+        <label class="check small"><input type="checkbox" id="prefetch"> Download fully first (needs CORS, uses memory)</label>
       </form>
+      <div id="prefetchInfo" class="muted small" hidden></div>
       <p class="muted small">Each person loads their own copy. Use the same video for best results.</p>
     </div>
 
@@ -51,6 +59,14 @@
           <input id="inviteInput" readonly>
           <button id="copyBtn" type="button">Copy</button>
         </div>
+      </div>
+
+      <div class="card">
+        <h3>Stream</h3>
+        <div class="row">
+          <button id="streamBtn" type="button" disabled>Stream my video to peer</button>
+        </div>
+        <p class="muted small" id="streamNote">Host only. Sends your playing video over WebRTC; peer needs no copy. Use if their download is slow.</p>
       </div>
 
       <div class="card">

@@ -10,6 +10,11 @@ Watch a video in sync with one other person. Static site, no backend: peer-to-pe
 
 First joiner hosts (peer ID `akash-vani-room-<code>`); second connects. Host sends a time heartbeat every 2 s; guest nudges `playbackRate` for small drift and hard-seeks past 1 s.
 
+## Slow connection / buffering
+- While either side buffers (and 10 s after), sync goes loose: gaps up to ~2 s are left alone, nudges kick in beyond that, hard seek only beyond 6 s. A stalled or seeking player is never forced to seek.
+- "Download fully first" fetches the whole URL into memory before playing (server must allow CORS).
+- "Stream my video to peer" (host only): host's playing video is sent over WebRTC. Needs a local file or a CORS-enabled URL. Peer gets play/pause/seek controls that drive the host.
+
 ## Run locally
 ES modules need HTTP, not `file://`:
 ```sh
