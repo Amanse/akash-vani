@@ -37,6 +37,7 @@
         <button id="sbPlay" type="button">Play</button>
         <input id="sbSeek" type="range" min="0" max="1" step="0.1" value="0">
         <span id="sbTime" class="muted small">0:00</span>
+        <button id="sbFull" type="button">Fullscreen</button>
       </div>
       <form id="srcForm" class="src">
         <div class="seg">
@@ -44,7 +45,7 @@
           <label><input type="radio" name="srcType" value="file"> Local file</label>
         </div>
         <input id="urlInput" type="url" placeholder="https://example.com/video.mp4">
-        <input id="fileInput" type="file" accept="video/*,.mp4,.m4v,.mov,.webm,.mkv,.ogv" hidden>
+        <input id="fileInput" type="file" hidden>
         <button type="submit" class="primary">Load</button>
         <label class="check small"><input type="checkbox" id="prefetch"> Download fully first (needs CORS, uses memory)</label>
       </form>

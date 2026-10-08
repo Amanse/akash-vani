@@ -79,20 +79,28 @@ $('streamBtn').onclick = () => {
   if (!stream || !stream.getTracks().length) return logMsg('Cannot capture video yet. Press play once, then retry.', 'sys');
   streamCall = net.peer.call(net.remoteId, stream, { metadata: { kind: 'video' } });
   streamCall.on('close', () => { streamCall = null; updateStreamBtn(); });
-  setTimeout(() => { // raise sender bitrate cap
-    try {
-      streamCall.peerConnection.getSenders().forEach((snd) => {
-        if (snd.track?.kind !== 'video') return;
-        const prm = snd.getParameters();
-        prm.encodings = prm.encodings?.length ? prm.encodings : [{}];
-        prm.encodings[0].maxBitrate = 4_000_000;
-        snd.setParameters(prm);
-      });
-    } catch {}
-  }, 1500);
+  limitEncoder(streamCall, el);
+  setTimeout(() => limitEncoder(streamCall, el), 1500); // senders may not exist yet at first call
   logMsg('Streaming your video to peer', 'sys');
   updateStreamBtn();
 };
+
+// Cap resolution/bitrate/fps so a huge source (e.g. 4K movie) cannot overwhelm the realtime encoder.
+function limitEncoder(call, el) {
+  try {
+    call.peerConnection.getSenders().forEach((snd) => {
+      if (snd.track?.kind !== 'video') return;
+      snd.track.contentHint = 'motion';
+      const prm = snd.getParameters();
+      prm.encodings = prm.encodings?.length ? prm.encodings : [{}];
+      const h = el.videoHeight || 720;
+      prm.encodings[0].scaleResolutionDownBy = Math.max(1, h / 720);
+      prm.encodings[0].maxBitrate = 3_000_000;
+      prm.encodings[0].maxFramerate = 30;
+      snd.setParameters(prm).catch(() => {});
+    });
+  } catch {}
+}
 
 function stopStream() {
   if (streamCall) { const c = streamCall; streamCall = null; c.close(); }
@@ -133,6 +141,10 @@ $('sbPlay').onclick = () => {
   if (!hb) return;
   net.send({ t: hb.paused ? 'play' : 'pause', time: estTime() });
   hb = { ...hb, paused: !hb.paused, time: estTime(), at: performance.now() };
+};
+$('sbFull').onclick = () => {
+  if (document.fullscreenEnabled && rv.requestFullscreen) rv.requestFullscreen();
+  else if (rv.webkitEnterFullscreen) rv.webkitEnterFullscreen(); // iPhone only fullscreens <video> this way
 };
 $('sbSeek').onchange = (e) => {
   const time = +e.target.value;
@@ -206,6 +218,7 @@ document.querySelectorAll('input[name=srcType]').forEach((r) => {
     $('urlInput').hidden = file;
   };
 });
+const MAX_PREFETCH = 600e6; // whole file is held in RAM
 async function prefetch(url) {
   const info = $('prefetchInfo');
   info.hidden = false;
@@ -213,6 +226,10 @@ async function prefetch(url) {
     const res = await fetch(url, { mode: 'cors' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const total = +res.headers.get('content-length') || 0;
+    if (total > MAX_PREFETCH) {
+      res.body.cancel();
+      throw new Error(`file is ${(total / 1e9).toFixed(1)} GB, over the ${MAX_PREFETCH / 1e6} MB limit`);
+    }
     const chunks = [];
     let got = 0;
     const reader = res.body.getReader();
